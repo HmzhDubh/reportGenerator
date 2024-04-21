@@ -1,0 +1,1093 @@
+function onOpen() {
+
+  // this function produce a nemu and item on the sheet screen
+  const ui = SpreadsheetApp.getUi();
+  const menu = ui.createMenu('Extract Tool');
+  menu.addItem('Extract Tables', 'ExtractTables');
+  menu.addToUi();
+  
+}
+function eccTable(startRow, selectionRow, textTitle){
+
+  this.textTitle = textTitle;
+  
+  var activeSheet = SpreadsheetApp.getActiveSheet();
+  
+  var selection = activeSheet.getSelection().getCurrentCell().getA1Notation(); // selection is the current active cell
+  console.log('Current Cell: '+ selection);
+
+  var selectionRow = activeSheet.getSelection().getCurrentCell().getRow();
+
+  var cNum; // B
+  var cText; // D
+  var cNotes; // H
+  var cCorrectiveActions; // I
+  var cDate; // O
+
+  // lists to save columns data to be printed into a table
+  var cMainList = []; // cNum and cText
+  var firstList = []; // cNum and cText cCorrectiveActions
+  var secondList = [];// cNum and cText
+  var thirdList = []; // cNum and cNotes and cDate
+
+  // Main List headings
+  cNum = SpreadsheetApp.getActiveSheet().getRange('B2').getValue(); 
+  cText = SpreadsheetApp.getActiveSheet().getRange('D2').getValue();
+  cMainList.push([cText, cNum]);
+
+  // First List headings
+  cNum = SpreadsheetApp.getActiveSheet().getRange('B2').getValue(); 
+  cNotes = SpreadsheetApp.getActiveSheet().getRange('I2').getValue();
+  cCorrectiveActions = SpreadsheetApp.getActiveSheet().getRange('J2').getValue();
+  firstList.push([cCorrectiveActions, cNotes, cNum]);
+
+  // Second List headings
+  cNum = SpreadsheetApp.getActiveSheet().getRange('B2').getValue(); 
+  cText = SpreadsheetApp.getActiveSheet().getRange('D2').getValue();
+  secondList.push([cText, cNum]);
+  
+  // Third List headings
+  cNotes = SpreadsheetApp.getActiveSheet().getRange('N2').getValue();
+  cDate = SpreadsheetApp.getActiveSheet().getRange('P2').getValue();
+  thirdList.push([cDate, cNotes, cNum]);
+
+  var comp1 = 0;
+  var comp2 = 0;
+  var comp3 = 0;
+  var totalC1 = 0;
+  var totalC2 = 0;
+  var totalC3 = 0;
+
+  var perc1 = 0;
+  var perc2 = 0;
+  var perc3 = 0;
+
+  var textTitle;
+
+  for(var i = startRow; i <= selectionRow; i++){
+
+    totalC1++;
+    totalC2++;
+    totalC3++;
+      
+    // Main list
+    // list headings
+    var hcM = SpreadsheetApp.getActiveSheet().getRange('H' + i).getValue();
+    var kcM = SpreadsheetApp.getActiveSheet().getRange('K' + i).getValue();
+    var mcM = SpreadsheetApp.getActiveSheet().getRange('M' + i).getValue(); 
+    
+    if(hcM == 'غير مطبق' || hcM == 'مطبق جزئياً' || kcM == 'غير مطبق' || kcM == 'مطبق جزئياً' || mcM == 'غير مطبق' || mcM == 'مطبق جزئياً'){
+      
+      cNum = SpreadsheetApp.getActiveSheet().getRange('B' + i).getValue(); 
+      cText = SpreadsheetApp.getActiveSheet().getRange('D' + i).getValue();
+
+      if(cMainList.includes(cNum)){
+        Logger.log('Already Pushed');
+      }else{
+        cMainList.push([cText, cNum]);
+      }
+
+    }else if (hcM == 'مطبق كلياً'){
+
+      cNum = SpreadsheetApp.getActiveSheet().getRange('B' + i).getValue();
+      
+    }
+    // First List
+    var hc = SpreadsheetApp.getActiveSheet().getRange('H' + i).getValue(); 
+    if(hc == 'غير مطبق' || hc == 'مطبق جزئياً'){
+
+      if(i == selectionRow && hc == 'مطبق كلياً'){
+          comp1++;
+          continue;
+      }
+
+      cNum = SpreadsheetApp.getActiveSheet().getRange('B' + i).getValue(); 
+      cNotes = SpreadsheetApp.getActiveSheet().getRange('I' + i).getValue();
+      cCorrectiveActions = SpreadsheetApp.getActiveSheet().getRange('J' + i).getValue();
+      firstList.push([cCorrectiveActions, cNotes, cNum]);
+      
+
+    }else if (hc == 'مطبق كلياً'){
+
+      cNum = SpreadsheetApp.getActiveSheet().getRange('B' + i).getValue();
+      comp1++;
+      
+    }else if(hc != 'مطبق كلياً' && hc != 'مطبق جزئياً' && hc != 'غير مطبق'){
+      totalC1--;
+    } 
+    
+    // Second List
+    var kc = SpreadsheetApp.getActiveSheet().getRange('K' + i).getValue(); 
+    if(kc == 'غير مطبق' || kc == 'مطبق جزئياً'){
+
+      if(i == selectionRow && kc == 'مطبق كلياً'){
+          comp2++;
+          continue;
+      }
+    
+      cText = SpreadsheetApp.getActiveSheet().getRange('D' + i).getValue();
+      secondList.push([cText, cNum]);
+
+    }else if (kc == 'مطبق كلياً'){
+      
+      cNum = SpreadsheetApp.getActiveSheet().getRange('B' + i).getValue();
+      comp2++;
+    }else if(kc != 'مطبق كلياً' && kc != 'مطبق جزئياً' && kc != 'غير مطبق'){
+      totalC2--;
+    } 
+    
+    // Third List
+    var mc = SpreadsheetApp.getActiveSheet().getRange('M' + i).getValue();
+    if(mc == 'غير مطبق' || mc == 'مطبق جزئياً'){ 
+      
+      if(i == selectionRow && mc == 'مطبق كلياً'){
+          comp3++;
+          continue;
+      }
+      cNotes = SpreadsheetApp.getActiveSheet().getRange('N' + i).getValue();
+      cDate = SpreadsheetApp.getActiveSheet().getRange('P' + i).getValue();
+      thirdList.push([cDate, cNotes, cNum]);
+
+    }else if (mc == 'مطبق كلياً'){
+      
+      cNum = SpreadsheetApp.getActiveSheet().getRange('B' + i).getValue();
+      comp3++;
+    }else if(mc != 'مطبق كلياً' && mc != 'مطبق جزئياً' && mc != 'غير مطبق'){
+      totalC3--;
+    }
+    perc1 = (comp1 / totalC1) * 100;
+    perc2 = (comp2 / totalC2) * 100;
+    perc3 = (comp3 / totalC3) * 100;
+
+  }
+  Logger.log('p1: ' + perc1);
+  Logger.log('p2: ' + perc2);
+  Logger.log('p3: ' + perc3);
+  
+  const googleDocsTamplet = DriveApp.getFileById('1jFt-11LW6QVQEFqqIp8ly1hcJnhnsg4eRWRYCCUB0Js'); // This line represent the tamplate ID
+  const destinationFolder = DriveApp.getFolderById('1mw4np0CpIgseIx43JiWI5S5CxqBLOhbX'); // This line represent the distination folder ID
+  var copyName = SpreadsheetApp.getActiveSheet().getRange(selection).getValue();
+  if(selection.toString().startsWith('B')){
+
+    var copy = googleDocsTamplet.makeCopy('Final Copy of #' + copyName, destinationFolder); // The name of the new copy
+    var doc = DocumentApp.openById(copy.getId());
+    var body = doc.getBody();
+
+    // Create charts for each table 
+    // chart 1
+    if(perc1 > 1){
+    var percList1 =  [['مطبقة كلياً',perc1],['غير مطبقة كلياً', (100 - perc1)]];
+    var dataTable1 = Charts.newDataTable();
+    dataTable1.addColumn(Charts.ColumnType.STRING, 'الجهة');
+    dataTable1.addColumn(Charts.ColumnType.NUMBER, 'نسبة الالتزام');
+    dataTable1.addRow(percList1[0]);
+    dataTable1.addRow(percList1[1]);
+
+    var chart1 = Charts.newPieChart().setDataTable(dataTable1).setTitle("نسبة الالتزام بعد مراجعة المدقق الخارجي").build();
+    
+    var img1 = chart1.getAs('image/png');
+    }
+
+    // chart 2
+    if(perc2 > 1){
+    var percList2 =  [['مطبقة كلياً',perc2], ['غير مطبقة كلياً', (100 - perc2)]];
+    var dataTable2 = Charts.newDataTable();
+    dataTable2.addColumn(Charts.ColumnType.STRING, 'العنوان');
+    dataTable2.addColumn(Charts.ColumnType.NUMBER, 'نسبة الالتزام');
+    dataTable2.addRow(percList2[0]);
+    dataTable2.addRow(percList2[1]);
+
+    var chart2 = Charts.newPieChart().setDataTable(dataTable2).setTitle("نسبة الالتزام بعد مراجعة مركز الأمن السيبراني").build();
+    
+    var img2 = chart2.getAs('image/png');
+    }
+    // chart 3 
+    if(perc3 > 1){
+    var percList3 =  [['مطبقة كلياً',perc3], ['غير مطبقة كلياً', (100 - perc3)]];
+    var dataTable3 = Charts.newDataTable();
+    dataTable3.addColumn(Charts.ColumnType.STRING, 'الجهة');
+    dataTable3.addColumn(Charts.ColumnType.NUMBER, 'نسبة الالتزام');
+    dataTable3.addRow(percList3[0]);
+    dataTable3.addRow(percList3[1]);
+
+    var chart3 = Charts.newPieChart().setDataTable(dataTable3).setTitle("نسبة الالتزام بعد مراجعة مدقق عمادة الجودة والإعتماد الأكاديمي").build();
+    
+    var img3 = chart3.getAs('image/png');
+    }
+    // Tables header Style
+    var headerStyle = {};
+    headerStyle[DocumentApp.Attribute.SPACING_BEFORE] = 0;
+    headerStyle[DocumentApp.Attribute.SPACING_AFTER] = 0;
+    headerStyle[DocumentApp.Attribute.LINE_SPACING] = 0;
+    headerStyle[DocumentApp.Attribute.BOLD] = true;
+    headerStyle[DocumentApp.Attribute.BACKGROUND_COLOR] = '#bfbfbf';
+    headerStyle[DocumentApp.Attribute.FOREGROUND_COLOR] = '#000000';
+    
+    // Paragraphs Style 
+    var titleStyle = {};
+    titleStyle[DocumentApp.Attribute.HORIZONTAL_ALIGNMENT] = DocumentApp.HorizontalAlignment.LEFT;
+    titleStyle[DocumentApp.Attribute.FONT_FAMILY] = 'Calibri';
+    titleStyle[DocumentApp.Attribute.FONT_SIZE] = 20;
+    titleStyle[DocumentApp.Attribute.FOREGROUND_COLOR] = '#15979e';
+    titleStyle[DocumentApp.Attribute.LEFT_TO_RIGHT] = false;
+    titleStyle[DocumentApp.Attribute.SPACING_BEFORE] = 0;
+    titleStyle[DocumentApp.Attribute.SPACING_AFTER] = 0;
+    titleStyle[DocumentApp.Attribute.LINE_SPACING] = 1;
+
+    // Images Style/Charts style
+    var imgStyle = {};
+    imgStyle[DocumentApp.Attribute.HORIZONTAL_ALIGNMENT] = DocumentApp.HorizontalAlignment.CENTER;
+    imgStyle[DocumentApp.Attribute.LEFT_TO_RIGHT] = false;
+    imgStyle[DocumentApp.Attribute.BORDER_COLOR] = '#000000';
+    
+    // Cells Style 
+    var cellStyle = {};
+    cellStyle[DocumentApp.Attribute.HORIZONTAL_ALIGNMENT] = DocumentApp.HorizontalAlignment.CENTER;
+    cellStyle[DocumentApp.Attribute.VERTICAL_ALIGNMENT] = DocumentApp.VerticalAlignment.CENTER;
+    cellStyle[DocumentApp.Attribute.FONT_FAMILY] = 'Arial';
+    cellStyle[DocumentApp.Attribute.FONT_SIZE] = 12;
+    cellStyle[DocumentApp.Attribute.BOLD] = false;
+    cellStyle[DocumentApp.Attribute.FOREGROUND_COLOR] = '#000000';
+    cellStyle[DocumentApp.Attribute.INDENT_START] = false;
+    
+    // Paragraphs inside cells style
+    var paraStyle = {};
+    paraStyle[DocumentApp.Attribute.HORIZONTAL_ALIGNMENT] = DocumentApp.HorizontalAlignment.CENTER;
+    paraStyle[DocumentApp.Attribute.VERTICAL_ALIGNMENT] = DocumentApp.VerticalAlignment.CENTER;
+    paraStyle[DocumentApp.Attribute.SPACING_BEFORE] = 0;
+    paraStyle[DocumentApp.Attribute.SPACING_AFTER] = 0;
+    paraStyle[DocumentApp.Attribute.LINE_SPACING] = 0;
+    paraStyle[DocumentApp.Attribute.FONT_FAMILY] = 'Arial';
+    paraStyle[DocumentApp.Attribute.FONT_SIZE] = 12;
+    paraStyle[DocumentApp.Attribute.INDENT_START] = 0;
+    paraStyle[DocumentApp.Attribute.BOLD] = false;
+    paraStyle[DocumentApp.Attribute.FOREGROUND_COLOR] = '#000000';
+    
+    // Percentage title for each table
+    var percPar1 = 'نسبة التزام هيئة الأمن السيبراني';
+    var percPar2 = 'نسبة التزام مركز الأمن السيبراني';
+    var percPar3 = 'نسبة التزام عمادة الجودة والإعتماد الأكاديمي';
+
+    // tables titles
+    var t1Title = 'نص الضوابط الغير مطبقة والمطبقة جزئيا';  
+    var t2Title = 'مراجعة تقرير المدقق الخارجي ( هيئة الأمن السيبراني) في النصف الأول';   
+    var t3Title = 'مراجعة مركز الأمن السيبراني في النصف الثاني';
+    var t4Title = 'مراجعة مدقق عمادة الجودة والاعتماد الأكاديمي للنصف الثاني';
+
+    // Replace new information in the document
+    body.replaceText('{{Title1}}', textTitle);
+    body.replaceText('{{Title2}}', textTitle);
+    body.replaceText('{{cNum}}', copyName);
+
+    // Check the Main list, if not empty append it to the doc
+
+    if(cMainList.length > 1){
+
+      body.appendParagraph(t1Title).setAttributes(titleStyle);
+
+      var mainTable = body.appendTable(); 
+      //Add rows which contain column data
+      for(var tl = 0; tl < cMainList.length; tl++){
+        
+        var tRow = mainTable.appendTableRow();
+
+        for(var tc = 0; tc < cMainList[tl].length; tc++){
+
+          var tCell = tRow.appendTableCell().setAttributes(cellStyle).clear();
+          var tp = tCell.appendParagraph(cMainList[tl][tc]);
+          tp.setAttributes(paraStyle);
+          
+        }
+      }
+      // Edit the table heading attriputes
+      mainTable.getRow(0).getCell(0).setAttributes(headerStyle);
+      mainTable.getRow(0).getCell(1).setAttributes(headerStyle);
+    }
+    // Check the First list, if not empty append it to the document
+    if(firstList.length > 1){
+
+      body.appendParagraph(t2Title).setAttributes(titleStyle);
+
+      var firstTable = body.appendTable();
+
+      // Add The other rows which contain column data
+       for(var tl = 0; tl < firstList.length; tl++){
+        
+        var tRow = firstTable.appendTableRow();
+
+        for(var tc = 0; tc < firstList[tl].length; tc++){
+
+          var tCell = tRow.appendTableCell().setAttributes(cellStyle);
+          var tp = tCell.appendParagraph(firstList[tl][tc]);
+          tp.setAttributes(paraStyle);
+          
+        }
+      }
+
+      firstTable.getRow(0).getCell(0).setAttributes(headerStyle);
+      firstTable.getRow(0).getCell(1).setAttributes(headerStyle);
+      firstTable.getRow(0).getCell(2).setAttributes(headerStyle);
+      
+      body.appendParagraph(percPar1).setAttributes(titleStyle);
+      body.appendParagraph(perc1.toFixed(2) + '%').setAttributes(titleStyle);
+      var inline1 = body.appendImage(img1);
+      inline1.getParent().setAttributes(imgStyle);
+      
+    }else if(perc1 >= 100){ // list is empty which means the control is applied 100 %
+      perc1 = 100;
+      Logger.log('perc1'+perc1);
+      body.appendParagraph(percPar1).setAttributes(titleStyle);
+      body.appendParagraph(perc1.toFixed(2) + '%').setAttributes(titleStyle);
+      var inline1 = body.appendImage(img1);
+      inline1.getParent().setAttributes(imgStyle);
+
+    }
+    // Check the Second list, if not empty append it to the document
+    if(secondList.length > 1){
+
+      body.appendParagraph(t3Title).setAttributes(titleStyle);
+
+      var secondTable = body.appendTable();
+       for(var tl = 0; tl < secondList.length; tl++){
+        
+        var tRow = secondTable.appendTableRow();
+
+        for(var tc = 0; tc < secondList[tl].length; tc++){
+
+          var tCell = tRow.appendTableCell().setAttributes(cellStyle);
+          var tp = tCell.appendParagraph(secondList[tl][tc]);
+          tp.setAttributes(paraStyle);
+          
+        }
+      }
+
+      secondTable.getRow(0).getCell(0).setAttributes(headerStyle);
+      secondTable.getRow(0).getCell(1).setAttributes(headerStyle);
+
+      body.appendParagraph(percPar2).setAttributes(titleStyle);
+      body.appendParagraph(perc2.toFixed(2) + '%').setAttributes(titleStyle);
+      var inline2 = body.appendImage(img2);
+      inline2.getParent().setAttributes(imgStyle);
+
+    }else if(perc2 >= 100){ // list is empty which means the control is applied 100 %
+      perc2 = 100;
+      Logger.log('perc2' + perc2);
+      body.appendParagraph(percPar2).setAttributes(titleStyle);
+      body.appendParagraph(perc2.toFixed(2) + '%').setAttributes(titleStyle);
+      var inline2 = body.appendImage(img2);
+      inline2.getParent().setAttributes(imgStyle);
+      
+    }
+    // Check the Third list, if not empty append it to the documnet
+    if(thirdList.length > 1){
+
+      body.appendParagraph(t4Title).setAttributes(titleStyle);
+
+      var thirdTable = body.appendTable();
+      for(var tl = 0; tl < thirdList.length; tl++){
+      
+      var tRow = thirdTable.appendTableRow();
+
+        for(var tc = 0; tc < thirdList[tl].length; tc++){
+
+          var tCell = tRow.appendTableCell().setAttributes(cellStyle);
+          var tp = tCell.appendParagraph(thirdList[tl][tc]);
+          tp.setAttributes(paraStyle);
+          
+        }
+      }
+      
+      thirdTable.getRow(0).getCell(0).setAttributes(headerStyle);
+      thirdTable.getRow(0).getCell(1).setAttributes(headerStyle);
+      thirdTable.getRow(0).getCell(2).setAttributes(headerStyle);
+      
+      body.appendParagraph(percPar3).setAttributes(titleStyle);  
+      body.appendParagraph(perc3.toFixed(2) + '%').setAttributes(titleStyle);
+      var inline3 = body.appendImage(img3);
+      inline3.getParent().setAttributes(imgStyle);
+
+    }else if(perc3 >= 100){ // list is empty which means the control is applied 100 %
+      perc3 = 100;
+      Logger.log('perc3' + perc3);
+      body.appendParagraph(percPar3).setAttributes(titleStyle);
+      body.appendParagraph(perc3.toFixed(2) + '%').setAttributes(titleStyle);
+      var inline3 = body.appendImage(img3);
+      inline3.getParent().setAttributes(imgStyle);
+      
+    }
+    doc.saveAndClose();
+  }else{
+
+    Browser.msgBox('Please choose cells that include a (review number) which starts with B like B5 and B12 etc.. <<< الرجاء إختيار الخلايا اللتي تحتوي على مراجعة >>> ');
+    
+  }
+}
+function oTables(startRow, selectionRow, textTitle){
+
+  this.textTitle = textTitle;
+  
+  var activeSheet = SpreadsheetApp.getActiveSheet();
+  
+  var selection = activeSheet.getSelection().getCurrentCell().getA1Notation(); // selection is the current active cell
+  console.log('Current Cell: '+ selection);
+
+  var selectionRow = activeSheet.getSelection().getCurrentCell().getRow();
+  
+
+  var cNum; // B
+  var cText; // D
+  var cNotes; // H
+  var cCorrectiveActions; // I
+  var cDate; // O
+
+  // lists to save columns data to be printed into a table
+  var cMainList = []; // cNum and cText
+  var secondList = [];// cNum and cText
+  var thirdList = []; // cNum and cNotes and cDate
+
+  // Main List headings
+  cNum = SpreadsheetApp.getActiveSheet().getRange('B2').getValue(); 
+  cText = SpreadsheetApp.getActiveSheet().getRange('D2').getValue();
+  cMainList.push([cText, cNum]);
+
+  // Second List headings
+  cNum = SpreadsheetApp.getActiveSheet().getRange('B2').getValue(); 
+  cText = SpreadsheetApp.getActiveSheet().getRange('D2').getValue();
+  secondList.push([cText, cNum]);
+  
+  // Third List headings
+  cNotes = SpreadsheetApp.getActiveSheet().getRange('N2').getValue();
+  cDate = SpreadsheetApp.getActiveSheet().getRange('P2').getValue();
+  thirdList.push([cDate, cNotes, cNum]);
+
+  var comp2 = 0;
+  var comp3 = 0;
+
+  var totalC2 = 0;
+  var totalC3 = 0;
+
+  var perc2 = 0;
+  var perc3 = 0;
+
+  var textTitle;
+
+
+  for(var i = startRow; i <= selectionRow; i++){
+
+
+      totalC2++;
+      totalC3++;
+       
+      // Main list
+      var hcM = SpreadsheetApp.getActiveSheet().getRange('H' + i).getValue();
+        var kcM = SpreadsheetApp.getActiveSheet().getRange('K' + i).getValue();
+        var mcM = SpreadsheetApp.getActiveSheet().getRange('M' + i).getValue();  
+      if(hcM == 'غير مطبق' || hcM == 'مطبق جزئياً' || kcM == 'غير مطبق' || kcM == 'مطبق جزئياً' || mcM == 'غير مطبق' || mcM == 'مطبق جزئياً'){
+
+        cNum = SpreadsheetApp.getActiveSheet().getRange('B' + i).getValue(); 
+          cText = SpreadsheetApp.getActiveSheet().getRange('D' + i).getValue();
+
+          if(cMainList.includes(cNum)){
+            Logger.log('Already Pushed');
+          }else{
+            cMainList.push([cText, cNum]);
+          }
+
+      }else if (hcM == 'مطبق كلياً'){
+
+        cNum = SpreadsheetApp.getActiveSheet().getRange('B' + i).getValue();
+        
+      }
+      var kc = SpreadsheetApp.getActiveSheet().getRange('K' + i).getValue(); 
+      if(kc == 'غير مطبق' || kc == 'مطبق جزئياً'){
+
+        if(i == selectionRow && kc == 'مطبق كلياً'){
+            comp2++;
+            continue;
+        }
+      
+        cText = SpreadsheetApp.getActiveSheet().getRange('D' + i).getValue();
+        secondList.push([cText, cNum]);
+
+      }else if (kc == 'مطبق كلياً'){
+        
+        cNum = SpreadsheetApp.getActiveSheet().getRange('B' + i).getValue();
+        comp2++;
+      }else if(kc != 'مطبق كلياً' && kc != 'مطبق جزئياً' && kc != 'غير مطبق'){
+        totalC2--;
+      }
+      
+      var mc = SpreadsheetApp.getActiveSheet().getRange('M' + i).getValue();
+      if(mc == 'غير مطبق' || mc == 'مطبق جزئياً'){ 
+        
+        if(i == selectionRow && mc == 'مطبق كلياً'){
+            comp3++;
+            continue;
+        }
+        cNotes = SpreadsheetApp.getActiveSheet().getRange('N' + i).getValue();
+        cDate = SpreadsheetApp.getActiveSheet().getRange('P' + i).getValue();
+        thirdList.push([cDate, cNotes, cNum]);
+
+      }else if (mc == 'مطبق كلياً'){
+          
+          cNum = SpreadsheetApp.getActiveSheet().getRange('B' + i).getValue();
+          comp3++;
+      }else if(mc != 'مطبق كلياً' && mc != 'مطبق جزئياً' && mc != 'غير مطبق'){
+        totalC3--;
+      } 
+      perc2 = (comp2 / totalC2) * 100;
+      perc3 = (comp3 / totalC3) * 100;
+  }
+  const googleDocsTamplet = DriveApp.getFileById('1jFt-11LW6QVQEFqqIp8ly1hcJnhnsg4eRWRYCCUB0Js'); // This line represent the tamplate ID
+  const destinationFolder = DriveApp.getFolderById('1mw4np0CpIgseIx43JiWI5S5CxqBLOhbX'); // This line represent the distination folder ID
+  var copyName = SpreadsheetApp.getActiveSheet().getRange(selection).getValue();
+  if(selection.toString().startsWith('B')){
+
+    var copy = googleDocsTamplet.makeCopy('Final Copy of #' + copyName, destinationFolder); // The name of the new copy
+    var doc = DocumentApp.openById(copy.getId());
+    var body = doc.getBody();
+
+    // Create charts for each table
+    // chart 2
+    var percList2 =  [['مطبقة كلياً',perc2], ['غير مطبقة كلياً', (100 - perc2)]];
+    var dataTable2 = Charts.newDataTable();
+    dataTable2.addColumn(Charts.ColumnType.STRING, 'العنوان');
+    dataTable2.addColumn(Charts.ColumnType.NUMBER, 'نسبة الالتزام');
+    dataTable2.addRow(percList2[0]);
+    dataTable2.addRow(percList2[1]);
+
+    var chart2 = Charts.newPieChart().setDataTable(dataTable2).setTitle("نسبة الالتزام بعد مراجعة مركز الأمن السيبراني").build();
+    
+    var img2 = chart2.getAs('image/png');
+
+    // chart 3 
+    var percList3 =  [['مطبقة كلياً',perc3], ['غير مطبقة كلياً', (100 - perc3)]];
+    var dataTable3 = Charts.newDataTable();
+    dataTable3.addColumn(Charts.ColumnType.STRING, 'الجهة');
+    dataTable3.addColumn(Charts.ColumnType.NUMBER, 'نسبة الالتزام');
+    dataTable3.addRow(percList3[0]);
+    dataTable3.addRow(percList3[1]);
+
+    var chart3 = Charts.newPieChart().setDataTable(dataTable3).setTitle("نسبة الالتزام بعد مراجعة مدقق عمادة الجودة والإعتماد الأكاديمي").build();
+    
+    var img3 = chart3.getAs('image/png');
+
+    // Tables header Style
+    var headerStyle = {};
+    headerStyle[DocumentApp.Attribute.SPACING_BEFORE] = 0;
+    headerStyle[DocumentApp.Attribute.SPACING_AFTER] = 0;
+    headerStyle[DocumentApp.Attribute.LINE_SPACING] = 0;
+    headerStyle[DocumentApp.Attribute.BOLD] = true;
+    headerStyle[DocumentApp.Attribute.BACKGROUND_COLOR] = '#bfbfbf';
+    headerStyle[DocumentApp.Attribute.FOREGROUND_COLOR] = '#000000';
+    
+    // Paragraphs Style 
+    var titleStyle = {};
+    titleStyle[DocumentApp.Attribute.HORIZONTAL_ALIGNMENT] = DocumentApp.HorizontalAlignment.LEFT;
+    titleStyle[DocumentApp.Attribute.FONT_FAMILY] = 'Calibri';
+    titleStyle[DocumentApp.Attribute.FONT_SIZE] = 20;
+    titleStyle[DocumentApp.Attribute.FOREGROUND_COLOR] = '#15979e';
+    titleStyle[DocumentApp.Attribute.LEFT_TO_RIGHT] = false;
+    titleStyle[DocumentApp.Attribute.SPACING_BEFORE] = 0;
+    titleStyle[DocumentApp.Attribute.SPACING_AFTER] = 0;
+    titleStyle[DocumentApp.Attribute.LINE_SPACING] = 1;
+
+    // Images Style/Charts style
+    var imgStyle = {};
+    imgStyle[DocumentApp.Attribute.HORIZONTAL_ALIGNMENT] = DocumentApp.HorizontalAlignment.CENTER;
+    imgStyle[DocumentApp.Attribute.LEFT_TO_RIGHT] = false;
+    imgStyle[DocumentApp.Attribute.BORDER_COLOR] = '#000000';
+    
+    // Cells Style 
+    var cellStyle = {};
+    cellStyle[DocumentApp.Attribute.HORIZONTAL_ALIGNMENT] = DocumentApp.HorizontalAlignment.CENTER;
+    cellStyle[DocumentApp.Attribute.VERTICAL_ALIGNMENT] = DocumentApp.VerticalAlignment.CENTER;
+    cellStyle[DocumentApp.Attribute.FONT_FAMILY] = 'Arial';
+    cellStyle[DocumentApp.Attribute.FONT_SIZE] = 12;
+    cellStyle[DocumentApp.Attribute.BOLD] = false;
+    cellStyle[DocumentApp.Attribute.FOREGROUND_COLOR] = '#000000';
+    cellStyle[DocumentApp.Attribute.INDENT_START] = false;
+    
+    // Paragraphs inside cells style
+    var paraStyle = {};
+    paraStyle[DocumentApp.Attribute.HORIZONTAL_ALIGNMENT] = DocumentApp.HorizontalAlignment.CENTER;
+    paraStyle[DocumentApp.Attribute.VERTICAL_ALIGNMENT] = DocumentApp.VerticalAlignment.CENTER;
+    paraStyle[DocumentApp.Attribute.SPACING_BEFORE] = 0;
+    paraStyle[DocumentApp.Attribute.SPACING_AFTER] = 0;
+    paraStyle[DocumentApp.Attribute.LINE_SPACING] = 0;
+    paraStyle[DocumentApp.Attribute.FONT_FAMILY] = 'Arial';
+    paraStyle[DocumentApp.Attribute.FONT_SIZE] = 12;
+    paraStyle[DocumentApp.Attribute.INDENT_START] = 0;
+    paraStyle[DocumentApp.Attribute.BOLD] = false;
+    paraStyle[DocumentApp.Attribute.FOREGROUND_COLOR] = '#000000';
+    
+    // Percentage title for each table
+    var percPar2 = 'نسبة التزام مركز الأمن السيبراني';
+    var percPar3 = 'نسبة التزام عمادة الجودة والإعتماد الأكاديمي';
+
+    // tables titles
+    var t1Title = 'نص الضوابط الغير مطبقة والمطبقة جزئيا';  
+    var t3Title = 'مراجعة مركز الأمن السيبراني في النصف الثاني';
+    var t4Title = 'مراجعة مدقق عمادة الجودة والاعتماد الأكاديمي للنصف الثاني';
+
+    // Replace new information in the document
+    body.replaceText('{{Title1}}', textTitle);
+    body.replaceText('{{Title2}}', textTitle);
+    body.replaceText('{{cNum}}', copyName);
+
+    // Check the Main list, if not empty append it to the doc
+
+    if(cMainList.length > 1){
+
+      body.appendParagraph(t1Title).setAttributes(titleStyle);
+
+      var mainTable = body.appendTable(); 
+      //Add rows which contain column data
+      for(var tl = 0; tl < cMainList.length; tl++){
+        
+        var tRow = mainTable.appendTableRow();
+
+        for(var tc = 0; tc < cMainList[tl].length; tc++){
+
+          var tCell = tRow.appendTableCell().setAttributes(cellStyle).clear();
+          var tp = tCell.appendParagraph(cMainList[tl][tc]);
+          tp.setAttributes(paraStyle);
+          
+        }
+      }
+      // Edit the table heading attriputes
+      mainTable.getRow(0).getCell(0).setAttributes(headerStyle);
+      mainTable.getRow(0).getCell(1).setAttributes(headerStyle);
+    }
+
+    // Check the Second list, if not empty append it to the document
+    if(secondList.length > 1){
+
+      body.appendParagraph(t3Title).setAttributes(titleStyle);
+
+      var secondTable = body.appendTable();
+       for(var tl = 0; tl < secondList.length; tl++){
+        
+        var tRow = secondTable.appendTableRow();
+
+        for(var tc = 0; tc < secondList[tl].length; tc++){
+
+          var tCell = tRow.appendTableCell().setAttributes(cellStyle);
+          var tp = tCell.appendParagraph(secondList[tl][tc]);
+          tp.setAttributes(paraStyle);
+          
+        }
+      }
+
+      secondTable.getRow(0).getCell(0).setAttributes(headerStyle);
+      secondTable.getRow(0).getCell(1).setAttributes(headerStyle);
+
+      body.appendParagraph(percPar2).setAttributes(titleStyle);
+      body.appendParagraph(perc2.toFixed(2) + '%').setAttributes(titleStyle);
+      var inline2 = body.appendImage(img2);
+      inline2.getParent().setAttributes(imgStyle);
+
+    }else if(perc2 >= 100){ // list is empty which means the control is applied 100 %
+      perc2 = 100;
+      Logger.log('perc2' + perc2);
+      body.appendParagraph(percPar2).setAttributes(titleStyle);
+      body.appendParagraph(perc2.toFixed(2) + '%').setAttributes(titleStyle);
+      var inline2 = body.appendImage(img2);
+      inline2.getParent().setAttributes(imgStyle);
+      
+    }
+    // Check the Third list, if not empty append it to the documnet
+    if(thirdList.length > 1){
+
+      body.appendParagraph(t4Title).setAttributes(titleStyle);
+
+      var thirdTable = body.appendTable();
+      for(var tl = 0; tl < thirdList.length; tl++){
+      
+      var tRow = thirdTable.appendTableRow();
+
+        for(var tc = 0; tc < thirdList[tl].length; tc++){
+
+          var tCell = tRow.appendTableCell().setAttributes(cellStyle);
+          var tp = tCell.appendParagraph(thirdList[tl][tc]);
+          tp.setAttributes(paraStyle);
+          
+        }
+      }
+      
+      thirdTable.getRow(0).getCell(0).setAttributes(headerStyle);
+      thirdTable.getRow(0).getCell(1).setAttributes(headerStyle);
+      thirdTable.getRow(0).getCell(2).setAttributes(headerStyle);
+      
+      body.appendParagraph(percPar3).setAttributes(titleStyle);  
+      body.appendParagraph(perc3.toFixed(2) + '%').setAttributes(titleStyle);
+      var inline3 = body.appendImage(img3);
+      inline3.getParent().setAttributes(imgStyle);
+
+    }else if(perc3 >= 100){ // list is empty which means the control is applied 100 %
+      perc3 = 100;
+      Logger.log('perc3' + perc3);
+      body.appendParagraph(percPar3).setAttributes(titleStyle);
+      body.appendParagraph(perc3.toFixed(2) + '%').setAttributes(titleStyle);
+      var inline3 = body.appendImage(img3);
+      inline3.getParent().setAttributes(imgStyle);
+      
+    }
+    doc.saveAndClose();
+  }else{
+
+    Browser.msgBox('Please choose cells that include a (review number) which starts with B like B5 and B12 etc.. <<< الرجاء إختيار الخلايا اللتي تحتوي على مراجعة >>> ');
+    
+  }
+}
+function ExtractTables(){
+
+  var activeSheet = SpreadsheetApp.getActiveSheet();
+  
+  var selection = activeSheet.getSelection().getCurrentCell().getA1Notation(); // selection is the current active cell
+
+  var selectionRow = activeSheet.getSelection().getCurrentCell().getRow();
+  var textTitle;
+  var sRow;
+
+  if(selection == 'B5'){
+
+    textTitle = 'إستراتيجية الأمن السيبراني';
+    sRow = 3;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B12'){
+
+    textTitle = 'سياسات وإجراءات ومعايير الأمن السيبراني';
+    sRow = 9;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B14'){
+
+    textTitle = 'أدوار ومسؤوليات الأمن السيبراني';
+    sRow = 13;
+    eccTable(sRow, selectionRow, textTitle);
+   
+  }
+  else if(selection == 'B22'){
+
+    textTitle = 'منهجية وإجراءات إدارة مخاطر الأمن السيبراني';
+    sRow = 15;
+    eccTable(sRow, selectionRow, textTitle);
+      
+  }
+  else if(selection == 'B26' || selection == 'B27'){
+
+    textTitle = 'مشاريع تطوير التطبيقات والبرمجيات الخاصة';
+    sRow = 23;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B32' || selection == 'B33'){
+
+    textTitle = 'إدارة المشاريع';
+    sRow = 27;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B36'){
+
+    textTitle = 'تطبيق ضوابط الأمن السيبراني';
+    sRow = 34;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B48' || selection == 'B47'){
+
+    textTitle = 'متطلبات الأمن السيبراني المتعلقة بالعاملين في الجهة';
+    sRow = 39;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B60'){
+
+    textTitle = 'تطبيق برنامج التوعية بالأمن السيبراني ';
+    sRow = 49;
+    eccTable(sRow, selectionRow, textTitle);
+       
+  }
+  else if(selection == 'B66'){
+
+    textTitle = 'إدارة الأصول المعلوماتية والتقنية';
+    sRow = 61;
+    eccTable(sRow, selectionRow, textTitle);
+     
+  }
+  else if(selection == 'B75'){
+
+    textTitle = 'إدارة هويات الدخول والصلاحيات';
+    sRow = 67;
+    eccTable(sRow, selectionRow, textTitle);
+  
+  }
+  else if(selection == 'B83'){
+
+    textTitle = 'حماية الأنظمة وأجهزة معالجة المعلومات';
+    sRow = 76;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B92'){
+
+    textTitle = 'حماية البريد الإلكتروني';
+    sRow = 84;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B104'){
+
+    textTitle = 'إدارة أمن الشبكات';
+    sRow = 93;
+    eccTable(sRow, selectionRow, textTitle);
+     
+  }
+  else if(selection == 'B112'){
+
+    textTitle = 'أمن الأجهزة المحمولة وأجهزة (BYOD)';
+    sRow = 105;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B119'){
+
+    textTitle = 'حماية بيانات ومعلومات الجهة';
+    sRow = 113;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B126'){
+
+    textTitle = 'التشفير';
+    sRow = 120;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B133'){
+
+    textTitle = 'إدارة النسخ الإحتياطية';
+    sRow = 127;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B142'){
+
+    textTitle = 'إدارة الثغرات التقنية';
+    sRow = 134;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B148'){
+
+    textTitle = 'عمليات اختبار الاختراق';
+    sRow = 143;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B157'){
+
+    textTitle = 'إدارة سجلات الأحداث ومراقبة الأمن السيبراني';
+    sRow = 149;
+    eccTable(sRow, selectionRow, textTitle);
+       
+  }
+  else if(selection == 'B166'){
+
+    textTitle = 'إدارة حوادث وتهديدات الأمن السيبراني';
+    sRow = 158;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B175'){
+
+    textTitle = 'حماية الأصول المعلوماتية والتقنية';
+    sRow = 167;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B184'){
+
+    textTitle = 'حماية تطبيقات الويب';
+    sRow = 176;
+    eccTable(sRow, selectionRow, textTitle);
+       
+  }
+  else if(selection == 'B191'){
+
+    textTitle = 'إدارة استمرارية الأعمال';
+    sRow = 185;
+    eccTable(sRow, selectionRow, textTitle);
+       
+  }
+  else if(selection == 'B200'){
+
+    textTitle = 'متطلبات الأمن السیبراني مع الأطراف الخارجیة';
+    sRow = 192;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B207'){
+
+    textTitle = 'خدمات الحوسبة السحابية والاستضافة';
+    sRow = 201;
+    eccTable(sRow, selectionRow, textTitle);
+
+  }
+  //  OSMACC
+  else if(selection == 'B216'){
+
+    textTitle = 'سياسات وإجراءات وعمليات الأمن السيبراني لحسابات التواصل الاجتماعي المعتمدة في الجهة';
+    sRow = 208;
+    oTables(sRow, selectionRow, textTitle);
+  
+  }
+  else if(selection == 'B244'){
+
+    textTitle = 'هويات الدخول والصلاحيات المستخدمة لحسابات التواصل الاجتماعي';
+    sRow = 217;
+    oTables(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B296'){
+
+    textTitle = 'هويات الدخول والصلاحيات المستخدمة للعمل عن بعد';
+    sRow = 289;
+    oTables(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B300' || selection == 'B301'){
+
+    textTitle = 'إعدادات الحماية لأنظمة العمل عن بعد والتحصين (Secure Configuration and Hardening)';
+    sRow = 297;
+    oTables(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B308'){
+
+    textTitle = 'إعدادات وقوائم جدار الحماية (Firewall Rules) ذات العلاقة بأنظمة العمل عن بعد';
+    sRow = 304;
+    oTables(sRow, selectionRow, textTitle);
+
+  }
+  // CCC
+  else if(selection == 'B370'){
+
+    textTitle = 'إدارة التغيير و تطبيقها لدى مقدمي الخدمات';
+    sRow = 349;
+    oTables(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B437'){
+
+    textTitle = 'سجلات الأحداث (Event Logs) والتدقيق (Audit Trail)';
+    sRow = 371;
+    oTables(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B461'){
+       
+    textTitle = 'إدارة المفاتيح لدى مقدمي الخدمات، ومراجعة تطبيقها';
+    sRow = 455;
+    oTables(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B467'){
+
+    textTitle = 'تطوير الأنظمة لدى مقدمي الخدمات، ومراجعة تطبيقها';
+    sRow = 462;
+    oTables(sRow, selectionRow, textTitle);
+    
+  }
+  else if(selection == 'B477'){
+
+    textTitle = 'استخدام وسائط المعلومات والبيانات المادية لدى مقدمي الخدمات، ومراجعة تطبيقها';
+    sRow = 468;
+    oTables(sRow, selectionRow, textTitle);
+   
+  }
+  // CCC 2 Service Providers
+  else if(selection == 'B508'){
+
+    textTitle = 'إدارة التغيير لدى مقدمي الخدمات، ومراجعة تطبيقها';
+    sRow = 485;
+    oTables(sRow, selectionRow, textTitle);
+  
+  }
+  else if(selection == 'B573'){
+       
+    textTitle = 'سجلات الأحداث (Event Logs) والتدقيق (Audit Trail)';
+    sRow = 509;
+    oTables(sRow, selectionRow, textTitle);
+   
+  }
+  else if(selection == 'B597'){
+
+    textTitle = 'إدارة مفاتيح التشفير';
+    sRow = 591;
+    oTables(sRow, selectionRow, textTitle);
+    
+  }
+  else if(selection == 'B603'){
+
+    textTitle = 'تطوير الأنظمة لدى مقدمي الخدمات، ومراجعة تطبيقها';
+    sRow = 598;
+    oTables(sRow, selectionRow, textTitle);
+       
+  }
+  else if(selection == 'B613'){
+
+    textTitle = 'استخدام وسائط المعلومات والبيانات المادية لدى مقدمي الخدمات، ومراجعة تطبيقها';
+    sRow = 604;
+    oTables(sRow, selectionRow, textTitle);
+  
+  }
+  else if(selection == 'B629'){
+
+    textTitle = 'مراجعة أمنية للشفرة المصدرية';
+    sRow = 622;
+    oTables(sRow, selectionRow, textTitle);
+       
+  }
+  else if(selection == 'B633' || selection == 'B634'){
+
+    textTitle = 'تطبيق ضوابط الأمن السيبراني للأنظمة الحساسة';
+    sRow = 622;
+    oTables(sRow, selectionRow, textTitle);
+    
+  }
+  else if(selection == 'B649'){
+      
+    textTitle = 'مراجعة هويات الدخول على الأنظمة الحساسة';
+    sRow = 638;
+    oTables(sRow, selectionRow, textTitle);   
+  
+  }
+  else if(selection == 'B656' || selection == '657'){
+
+    textTitle = 'إعدادات الأنظمة الحساسة وتحصيناتها  (Secure Configuration and Hardening)';
+    sRow = 650;
+    oTables(sRow, selectionRow, textTitle);
+       
+  }
+  else if(selection == 'B661'){
+       
+    textTitle = 'إعدادات جدار الحماية (Firewall rules) وقوائمه';
+    sRow = 659;
+    oTables(sRow, selectionRow, textTitle);
+
+  }
+  else if(selection == 'B714'){
+
+    textTitle = 'حماية التطبيقات الداخلية الخاصة بالأنظمة الحساسة';
+    sRow = 707;
+    oTables(sRow, selectionRow, textTitle);
+    
+  }
+}
+// END
