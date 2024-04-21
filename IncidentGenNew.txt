@@ -1,0 +1,707 @@
+function onOpen() {
+  
+  const ui = SpreadsheetApp.getUi();
+  const menu = ui.createMenu('Incident Report Generation');
+  menu.addItem('Generate new Document', 'genDoc');
+  menu.addToUi();
+
+}
+function genDoc(){
+  
+  // Modify this line according to your 'documnet tamplet ID' from the url
+  const googleDocsTamplet = DriveApp.getFileById('1gFHGM-SsgaIrZ8zneeS1KSthZLaQnd2QX7ikuHrIyVM'); 
+
+  // Modify this line according to your 'destination folder ID'
+  const destinationFolder = DriveApp.getFolderById('1DiXNEgJggZ15jtCIkDHfbGWfSqf5e4G3');
+
+  var selectionRow = SpreadsheetApp.getActiveSheet().getSelection().getCurrentCell().getRow(); // Row of selected Cell
+ 
+  var checkedBox = '☑';
+  var uncheckedBox = '☐';
+
+  if(selectionRow > 2){
+
+    var code = SpreadsheetApp.getActiveSheet().getRange('H' + selectionRow).getValue();
+    var copy = googleDocsTamplet.makeCopy('Incident Report_#' + code, destinationFolder);
+    var doc = DocumentApp.openById(copy.getId())
+    var body = doc.getBody();
+
+    var incidentTitle = SpreadsheetApp.getActiveSheet().getRange('G' + selectionRow).getValue();
+    
+    body.replaceText('{{IncidentTitle}}', incidentTitle);
+    body.replaceText('{{Code}}', code);
+
+    var incidentStatus = SpreadsheetApp.getActiveSheet().getRange('B' + selectionRow).getValue();
+    if(incidentStatus == 'مغلقة'){
+
+      body.replaceText('{{C}}',checkedBox);
+      body.replaceText('{{A}}', uncheckedBox);
+      body.replaceText('{{CI}}', uncheckedBox);
+
+    }else if(incidentStatus == 'نشطة'){
+
+      body.replaceText('{{C}}',uncheckedBox);
+      body.replaceText('{{A}}', checkedBox);
+      body.replaceText('{{CI}}', uncheckedBox);
+
+    }else if(incidentStatus == 'مغلقة وتحت التحقيق'){
+
+      body.replaceText('{{C}}',uncheckedBox);
+      body.replaceText('{{A}}', uncheckedBox);
+      body.replaceText('{{CI}}', checkedBox);
+
+    }else{
+
+      body.replaceText('{{C}}',uncheckedBox);
+      body.replaceText('{{A}}', uncheckedBox);
+      body.replaceText('{{CI}}', uncheckedBox);
+
+    }
+    
+    var incidentHandler = SpreadsheetApp.getActiveSheet().getRange('C' + selectionRow).getValue();
+    var irTeam = SpreadsheetApp.getActiveSheet().getRange('D' + selectionRow).getValue();
+    var approvedBy = SpreadsheetApp.getActiveSheet().getRange('E' + selectionRow).getValue();
+    body.replaceText('{{IncidentHandler}}', incidentHandler);
+    body.replaceText('{{IRTeam}}', irTeam);
+    body.replaceText('{{ApprovedBy}}', approvedBy);
+
+
+   
+    
+    var source = SpreadsheetApp.getActiveSheet().getRange('I' + selectionRow).getValue();
+    
+    if(source == 'نظام'){
+  
+      var sourceInfo = SpreadsheetApp.getActiveSheet().getRange('J' + selectionRow).getValue();
+      body.replaceText('{{system}}', checkedBox);
+
+      body.replaceText('{{نوع النظام}}', sourceInfo);
+
+      body.replaceText('{{ايميل}}', uncheckedBox);
+      body.replaceText('{{phone}}', uncheckedBox);
+      body.replaceText('{{mars}}', uncheckedBox);
+      body.replaceText('{{csn}}', uncheckedBox);
+      body.replaceText('{{edu}}', uncheckedBox);
+
+    }else if(source == 'إيميل'){
+
+      body.replaceText('{{نوع النظام}}', ' ');
+      body.replaceText('{{system}}', uncheckedBox);
+      body.replaceText('{{ايميل}}', checkedBox);
+      body.replaceText('{{phone}}', uncheckedBox);
+      body.replaceText('{{mars}}', uncheckedBox);
+      body.replaceText('{{csn}}', uncheckedBox);
+      body.replaceText('{{edu}}', uncheckedBox);
+
+    }else if(source == 'الهاتف'){
+
+      body.replaceText('{{نوع النظام}}', ' ');
+      body.replaceText('{{system}}', uncheckedBox);
+      body.replaceText('{{ايميل}}', uncheckedBox);
+      body.replaceText('{{phone}}', checkedBox);
+      body.replaceText('{{mars}}', uncheckedBox);
+      body.replaceText('{{csn}}', uncheckedBox);
+      body.replaceText('{{edu}}', uncheckedBox);
+
+    }else if(source == 'نموذج مارز'){
+
+      body.replaceText('{{نوع النظام}}', ' ');
+      body.replaceText('{{system}}', uncheckedBox);
+      body.replaceText('{{ايميل}}', uncheckedBox);
+      body.replaceText('{{phone}}', uncheckedBox);
+      body.replaceText('{{mars}}', checkedBox);
+      body.replaceText('{{csn}}', uncheckedBox);
+      body.replaceText('{{edu}}', uncheckedBox);
+
+    }else if(source.toString().includes('الهيئة الوطنية للأمن السيبراني')){
+
+      body.replaceText('{{نوع النظام}}', ' ');
+      body.replaceText('{{system}}', uncheckedBox);
+      body.replaceText('{{ايميل}}', uncheckedBox);
+      body.replaceText('{{phone}}', uncheckedBox);
+      body.replaceText('{{mars}}', uncheckedBox);
+      body.replaceText('{{csn}}', checkedBox);
+      body.replaceText('{{edu}}', uncheckedBox);
+
+    }else if(source == 'وزارة التعليم'){
+
+      body.replaceText('{{نوع النظام}}', ' ');
+      body.replaceText('{{system}}', uncheckedBox);
+      body.replaceText('{{ايميل}}', uncheckedBox);
+      body.replaceText('{{phone}}', uncheckedBox);
+      body.replaceText('{{mars}}', uncheckedBox);
+      body.replaceText('{{csn}}', uncheckedBox);
+      body.replaceText('{{edu}}', checkedBox);
+
+    }else{
+
+      body.replaceText('{{نوع النظام}}', ' ');
+      body.replaceText('{{system}}', uncheckedBox);
+      body.replaceText('{{ايميل}}', uncheckedBox);
+      body.replaceText('{{phone}}', uncheckedBox);
+      body.replaceText('{{mars}}', uncheckedBox);
+      body.replaceText('{{csn}}', uncheckedBox);
+      body.replaceText('{{edu}}', uncheckedBox);
+
+    }
+
+    var num = SpreadsheetApp.getActiveSheet().getRange('K' + selectionRow).getValue();    
+    body.replaceText('{{IncidentNum}}', num);
+
+    
+
+    var incidentType = SpreadsheetApp.getActiveSheet().getRange('L' + selectionRow).getValue();    
+
+    if(incidentType == 'Privilege Escalation'){
+
+      var incidentDetails = SpreadsheetApp.getActiveSheet().getRange('M' + selectionRow).getValue();    
+      body.replaceText('{{others}}', incidentDetails);
+
+      body.replaceText('{{PE}}', checkedBox);
+      body.replaceText('{{IT}}', uncheckedBox);
+      body.replaceText('{{UA}}', uncheckedBox);
+      body.replaceText('{{PH}}', uncheckedBox);
+      body.replaceText('{{PA}}', uncheckedBox);
+      body.replaceText('{{MA}}', uncheckedBox);
+      body.replaceText('{{O}}', uncheckedBox);
+      body.replaceText('{{WA}}', uncheckedBox);
+      body.replaceText('{{DDoS}}', uncheckedBox);
+
+    }else if(incidentType == 'Insider Threat'){
+
+      var incidentDetails = SpreadsheetApp.getActiveSheet().getRange('M' + selectionRow).getValue();    
+      body.replaceText('{{others}}', incidentDetails);
+
+      body.replaceText('{{PE}}', uncheckedBox);
+      body.replaceText('{{IT}}', checkedBox);
+      body.replaceText('{{UA}}', uncheckedBox);
+      body.replaceText('{{PH}}', uncheckedBox);
+      body.replaceText('{{PA}}', uncheckedBox);
+      body.replaceText('{{MA}}', uncheckedBox);
+      body.replaceText('{{O}}', uncheckedBox);
+      body.replaceText('{{WA}}', uncheckedBox);
+      body.replaceText('{{DDoS}}', uncheckedBox);
+
+
+    }else if(incidentType == 'Unauthorized Access   '){
+
+      var incidentDetails = SpreadsheetApp.getActiveSheet().getRange('M' + selectionRow).getValue();    
+      body.replaceText('{{others}}', incidentDetails);
+
+      body.replaceText('{{PE}}', uncheckedBox);
+      body.replaceText('{{IT}}', uncheckedBox);
+      body.replaceText('{{UA}}', checkedBox);
+      body.replaceText('{{PH}}', uncheckedBox);
+      body.replaceText('{{PA}}', uncheckedBox);
+      body.replaceText('{{MA}}', uncheckedBox);
+      body.replaceText('{{O}}', uncheckedBox);
+      body.replaceText('{{WA}}', uncheckedBox);
+      body.replaceText('{{DDoS}}', uncheckedBox);
+
+
+    }else if(incidentType == 'Password Attacks           '){
+
+      var incidentDetails = SpreadsheetApp.getActiveSheet().getRange('M' + selectionRow).getValue();    
+      body.replaceText('{{others}}', incidentDetails);
+
+      body.replaceText('{{PE}}', uncheckedBox);
+      body.replaceText('{{IT}}', uncheckedBox);
+      body.replaceText('{{UA}}', uncheckedBox);
+      body.replaceText('{{PH}}', uncheckedBox);
+      body.replaceText('{{PA}}', checkedBox);
+      body.replaceText('{{MA}}', uncheckedBox);
+      body.replaceText('{{O}}', uncheckedBox);
+      body.replaceText('{{WA}}', uncheckedBox);
+      body.replaceText('{{DDoS}}', uncheckedBox);
+
+
+    }else if(incidentType == 'Phishing '){
+
+      var incidentDetails = SpreadsheetApp.getActiveSheet().getRange('M' + selectionRow).getValue();    
+      body.replaceText('{{others}}', incidentDetails);
+
+      body.replaceText('{{PE}}', uncheckedBox);
+      body.replaceText('{{IT}}', uncheckedBox);
+      body.replaceText('{{UA}}', uncheckedBox);
+      body.replaceText('{{PH}}', checkedBox);
+      body.replaceText('{{PA}}', uncheckedBox);
+      body.replaceText('{{MA}}', uncheckedBox);
+      body.replaceText('{{O}}', uncheckedBox);
+      body.replaceText('{{WA}}', uncheckedBox);
+      body.replaceText('{{DDoS}}', uncheckedBox);
+
+
+    }else if(incidentType == 'Malware Attacks'){
+
+      var incidentDetails = SpreadsheetApp.getActiveSheet().getRange('M' + selectionRow).getValue();    
+      body.replaceText('{{others}}', incidentDetails);
+
+      body.replaceText('{{PE}}', uncheckedBox);
+      body.replaceText('{{IT}}', uncheckedBox);
+      body.replaceText('{{UA}}', uncheckedBox);
+      body.replaceText('{{PH}}', uncheckedBox);
+      body.replaceText('{{PA}}', uncheckedBox);
+      body.replaceText('{{MA}}', checkedBox);
+      body.replaceText('{{O}}', uncheckedBox);
+      body.replaceText('{{WA}}', uncheckedBox);
+      body.replaceText('{{DDoS}}', uncheckedBox);
+
+
+    }else if(incidentType == 'Web Application'){
+
+      var incidentDetails = SpreadsheetApp.getActiveSheet().getRange('M' + selectionRow).getValue();    
+      body.replaceText('{{others}}', incidentDetails);
+
+      body.replaceText('{{PE}}', uncheckedBox);
+      body.replaceText('{{IT}}', uncheckedBox);
+      body.replaceText('{{UA}}', uncheckedBox);
+      body.replaceText('{{PH}}', uncheckedBox);
+      body.replaceText('{{PA}}', uncheckedBox);
+      body.replaceText('{{MA}}', uncheckedBox);
+      body.replaceText('{{O}}', uncheckedBox);
+      body.replaceText('{{WA}}', checkedBox);
+      body.replaceText('{{DDoS}}', uncheckedBox);
+
+
+    }else if(incidentType == 'DDoS '){
+
+      var incidentDetails = SpreadsheetApp.getActiveSheet().getRange('M' + selectionRow).getValue();    
+      body.replaceText('{{others}}', incidentDetails);
+
+      body.replaceText('{{PE}}', uncheckedBox);
+      body.replaceText('{{IT}}', uncheckedBox);
+      body.replaceText('{{UA}}', uncheckedBox);
+      body.replaceText('{{PH}}', uncheckedBox);
+      body.replaceText('{{PA}}', uncheckedBox);
+      body.replaceText('{{MA}}', uncheckedBox);
+      body.replaceText('{{O}}', uncheckedBox);
+      body.replaceText('{{WA}}', uncheckedBox);
+      body.replaceText('{{DDoS}}', checkedBox);
+
+
+    }else if(incidentType == 'others'){
+
+      var incidentDetails = SpreadsheetApp.getActiveSheet().getRange('M' + selectionRow).getValue();    
+      body.replaceText('{{others}}', incidentDetails);
+      body.replaceText('{{O}}', checkedBox);
+      
+
+      body.replaceText('{{PE}}', uncheckedBox);
+      body.replaceText('{{IT}}', uncheckedBox);
+      body.replaceText('{{UA}}', uncheckedBox);
+      body.replaceText('{{PH}}', uncheckedBox);
+      body.replaceText('{{PA}}', uncheckedBox);
+      body.replaceText('{{MA}}', uncheckedBox);
+      body.replaceText('{{WA}}', uncheckedBox);
+      body.replaceText('{{DDoS}}', uncheckedBox);
+      
+    }else{
+
+      var incidentDetails = SpreadsheetApp.getActiveSheet().getRange('M' + selectionRow).getValue();    
+      body.replaceText('{{others}}', incidentDetails);
+      body.replaceText('{{O}}', uncheckedBox);
+      body.replaceText('{{PE}}', uncheckedBox);
+      body.replaceText('{{IT}}', uncheckedBox);
+      body.replaceText('{{UA}}', uncheckedBox);
+      body.replaceText('{{PH}}', uncheckedBox);
+      body.replaceText('{{PA}}', uncheckedBox);
+      body.replaceText('{{MA}}', uncheckedBox);
+      body.replaceText('{{WA}}', uncheckedBox);
+      body.replaceText('{{DDoS}}', uncheckedBox);
+
+    }
+    var threatName = SpreadsheetApp.getActiveSheet().getRange('N' + selectionRow).getValue();
+    var threatDetails = SpreadsheetApp.getActiveSheet().getRange('O' + selectionRow).getValue();
+
+    if(threatName == 'أشخاص'){
+
+      body.replaceText('{{person}}', checkedBox);
+      body.replaceText('{{PersonDet}}', threatDetails);
+
+      body.replaceText('{{IoCs}}', uncheckedBox);
+      body.replaceText('{{IoCsDet}}', ' ');
+      body.replaceText('{{files}}', uncheckedBox);
+      body.replaceText('{{FilesDet}}', ' ');
+
+    }else if(threatName == 'مؤشرات الاختراق IoCs'){
+
+      body.replaceText('{{IoCs}}', checkedBox);
+      body.replaceText('{{IoCsDet}}', threatDetails);
+
+      body.replaceText('{{person}}', uncheckedBox);
+      body.replaceText('{{PersonDet}}', ' ');
+      body.replaceText('{{files}}', uncheckedBox);
+      body.replaceText('{{FilesDet}}', ' ');
+
+
+    }else if(threatName == 'ملفات'){
+
+      body.replaceText('{{files}}', checkedBox);
+      body.replaceText('{{FilesDet}}', threatDetails);
+
+      body.replaceText('{{person}}', uncheckedBox);
+      body.replaceText('{{PersonDet}}', ' ');
+      body.replaceText('{{IoCs}}', uncheckedBox);
+      body.replaceText('{{IoCsDet}}', ' ');
+
+    }else{
+
+      body.replaceText('{{files}}', uncheckedBox);
+      body.replaceText('{{FilesDet}}', threatDetails);
+      body.replaceText('{{person}}', uncheckedBox);
+      body.replaceText('{{PersonDet}}', ' ');
+      body.replaceText('{{IoCs}}', uncheckedBox);
+      body.replaceText('{{IoCsDet}}', ' ');
+
+    }
+  
+    var incidentDetectionDate = SpreadsheetApp.getActiveSheet().getRange('P' + selectionRow).getValue();
+    var date1 = (Date(incidentDetectionDate).toString().slice(0,16));
+    body.replaceText('{{IncidentDetectionDate}}', date1);
+
+    var started = SpreadsheetApp.getActiveSheet().getRange('Q' + selectionRow).getValue();
+    var date2 = (Date(started).toString().slice(0,16));
+    body.replaceText('{{Started}}', date2);
+
+    var ended = SpreadsheetApp.getActiveSheet().getRange('R' + selectionRow).getValue();
+    var date3 = (Date(ended).toString().slice(0, 16));
+    body.replaceText('{{Ended}}', date3);
+
+    var noOfTimes = SpreadsheetApp.getActiveSheet().getRange('S' + selectionRow).getValue();
+    body.replaceText('{{NoOfTimes}}', noOfTimes);
+
+    var assetName = SpreadsheetApp.getActiveSheet().getRange('T' + selectionRow).getValue();
+    var iPAddress = SpreadsheetApp.getActiveSheet().getRange('U' + selectionRow).getValue();
+    var macAddress = SpreadsheetApp.getActiveSheet().getRange('V' + selectionRow).getValue();
+    var assOwner = SpreadsheetApp.getActiveSheet().getRange('W' + selectionRow).getValue();
+    body.replaceText('{{AssName}}', assetName);
+    body.replaceText('{{IPAdd}}', iPAddress);
+    body.replaceText('{{MACAdd}}', macAddress);
+    body.replaceText('{{Owner}}', assOwner);
+
+    var serviceImpact = SpreadsheetApp.getActiveSheet().getRange('X' + selectionRow).getValue();
+    if(serviceImpact == 'لا يوجد'){
+
+      body.replaceText('{{SN}}', checkedBox);
+      body.replaceText('{{SL}}', uncheckedBox);
+      body.replaceText('{{SM}}', uncheckedBox);
+      body.replaceText('{{SH}}', uncheckedBox);
+
+    }else if(serviceImpact == 'منخفض'){
+
+      body.replaceText('{{SN}}', uncheckedBox);
+      body.replaceText('{{SL}}', checkedBox);
+      body.replaceText('{{SM}}', uncheckedBox);
+      body.replaceText('{{SH}}', uncheckedBox);
+
+    }else if(serviceImpact == 'متوسط'){
+
+      body.replaceText('{{SN}}', uncheckedBox);
+      body.replaceText('{{SL}}', uncheckedBox);
+      body.replaceText('{{SM}}', checkedBox);
+      body.replaceText('{{SH}}', uncheckedBox);
+    
+    }else if(serviceImpact == 'عالي'){
+
+      body.replaceText('{{SN}}', uncheckedBox);
+      body.replaceText('{{SL}}', uncheckedBox);
+      body.replaceText('{{SM}}', uncheckedBox);
+      body.replaceText('{{SH}}', checkedBox);
+
+    }else{
+
+      body.replaceText('{{SN}}', uncheckedBox);
+      body.replaceText('{{SL}}', uncheckedBox);
+      body.replaceText('{{SM}}', uncheckedBox);
+      body.replaceText('{{SH}}', uncheckedBox);
+
+    }
+
+    var infoImpact = SpreadsheetApp.getActiveSheet().getRange('Y' + selectionRow).getValue();
+    if(infoImpact == 'لا يوجد'){
+
+      body.replaceText('{{IN}}', checkedBox);
+      body.replaceText('{{II}}', uncheckedBox);
+      body.replaceText('{{IP}}', uncheckedBox);
+      body.replaceText('{{ICD}}', uncheckedBox);
+
+    }else if(infoImpact == 'انتهاك للمعلومات المملوكة /الحساسة'){
+
+      body.replaceText('{{IN}}', uncheckedBox);
+      body.replaceText('{{II}}', checkedBox);
+      body.replaceText('{{IP}}', uncheckedBox);
+      body.replaceText('{{ICD}}', uncheckedBox);
+
+    }else if(infoImpact == 'انتهاك للخصوصية'){
+
+      body.replaceText('{{IN}}', uncheckedBox);
+      body.replaceText('{{II}}', uncheckedBox);
+      body.replaceText('{{IP}}', checkedBox);
+      body.replaceText('{{ICD}}', uncheckedBox);
+    
+    }else if(infoImpact == 'تغيير المعلومات أو حذفها'){
+
+      body.replaceText('{{IN}}', uncheckedBox);
+      body.replaceText('{{II}}', uncheckedBox);
+      body.replaceText('{{IP}}', uncheckedBox);
+      body.replaceText('{{ICD}}', checkedBox);
+
+    }else{
+
+      body.replaceText('{{IN}}', uncheckedBox);
+      body.replaceText('{{II}}', uncheckedBox);
+      body.replaceText('{{IP}}', uncheckedBox);
+      body.replaceText('{{ICD}}', uncheckedBox);
+
+    }
+
+    var recoveryPoss = SpreadsheetApp.getActiveSheet().getRange('Z' + selectionRow).getValue();
+    if(recoveryPoss == 'اعتيادي'){
+
+      body.replaceText('{{norm}}', checkedBox);
+      body.replaceText('{{cont}}', uncheckedBox);
+      body.replaceText('{{cont2}}', uncheckedBox);
+      body.replaceText('{{noRec}}', uncheckedBox);
+
+    }else if(recoveryPoss == 'تكميلي'){
+
+      body.replaceText('{{norm}}', uncheckedBox);
+      body.replaceText('{{cont}}', checkedBox);
+      body.replaceText('{{cont2}}', uncheckedBox);
+      body.replaceText('{{noRec}}', uncheckedBox);
+
+    }else if(recoveryPoss == 'ممتد'){
+      
+      body.replaceText('{{norm}}', uncheckedBox);
+      body.replaceText('{{cont}}', uncheckedBox);
+      body.replaceText('{{cont2}}', checkedBox);
+      body.replaceText('{{noRec}}', uncheckedBox);
+    
+    }else if(recoveryPoss == 'غير قابل للتعافي'){
+
+      body.replaceText('{{norm}}', uncheckedBox);
+      body.replaceText('{{cont}}', uncheckedBox);
+      body.replaceText('{{cont2}}', uncheckedBox);
+      body.replaceText('{{noRec}}', checkedBox);
+
+    }else{
+
+      body.replaceText('{{norm}}', uncheckedBox);
+      body.replaceText('{{cont}}', uncheckedBox);
+      body.replaceText('{{cont2}}', uncheckedBox);
+      body.replaceText('{{noRec}}', uncheckedBox); 
+
+    }
+
+    var incidentSeverity = SpreadsheetApp.getActiveSheet().getRange('AA' + selectionRow).getValue();
+    if(incidentSeverity == 'منخفض'){
+
+      body.replaceText('{{sLow}}', checkedBox);
+      body.replaceText('{{sMed}}', uncheckedBox);
+      body.replaceText('{{sHi}}', uncheckedBox);
+      body.replaceText('{{sVHi}}', uncheckedBox);
+
+    }else if(incidentSeverity == 'متوسط'){
+
+      body.replaceText('{{sLow}}', uncheckedBox);
+      body.replaceText('{{sMed}}', checkedBox);
+      body.replaceText('{{sHi}}', uncheckedBox);
+      body.replaceText('{{sVHi}}', uncheckedBox);
+
+    }else if(incidentSeverity == 'مرتفع'){
+      
+      body.replaceText('{{sLow}}', uncheckedBox);
+      body.replaceText('{{sMed}}', uncheckedBox);
+      body.replaceText('{{sHi}}', checkedBox);
+      body.replaceText('{{sVHi}}', uncheckedBox);
+    
+    }else if(incidentSeverity == 'مرتفع جداً'){
+
+      body.replaceText('{{sLow}}', uncheckedBox);
+      body.replaceText('{{sMed}}', uncheckedBox);
+      body.replaceText('{{sHi}}', uncheckedBox);
+      body.replaceText('{{sVHi}}', checkedBox);
+
+    }else{
+
+      body.replaceText('{{sLow}}', uncheckedBox);
+      body.replaceText('{{sMed}}', uncheckedBox);
+      body.replaceText('{{sHi}}', uncheckedBox);
+      body.replaceText('{{sVHi}}', uncheckedBox);
+
+    }
+
+    var externalParty = SpreadsheetApp.getActiveSheet().getRange('AB' + selectionRow).getValue();
+    if(externalParty == 'هيئة الأمن السيبراني'){
+
+      body.replaceText('{{csh}}', checkedBox);
+      body.replaceText('{{csc}}', uncheckedBox);
+      body.replaceText('{{leg}}', uncheckedBox);
+      body.replaceText('{{edu2}}', uncheckedBox);
+
+    }else if(externalParty == 'اللجنة الإشرافية للأمن السيبراني'){
+
+      body.replaceText('{{csh}}', uncheckedBox);
+      body.replaceText('{{csc}}', checkedBox);
+      body.replaceText('{{leg}}', uncheckedBox);
+      body.replaceText('{{edu2}}', uncheckedBox);
+
+    }else if(externalParty == 'الإدارة العامة للشؤون القانونية'){
+      
+      body.replaceText('{{csh}}', uncheckedBox);
+      body.replaceText('{{csc}}', uncheckedBox);
+      body.replaceText('{{leg}}', checkedBox);
+      body.replaceText('{{edu2}}', uncheckedBox);
+
+    
+    }else if(externalParty == 'وزارة التعليم'){
+
+      body.replaceText('{{csh}}', uncheckedBox);
+      body.replaceText('{{csc}}', uncheckedBox);
+      body.replaceText('{{leg}}', uncheckedBox);
+      body.replaceText('{{edu2}}', checkedBox);
+
+    }else{
+
+      body.replaceText('{{csh}}', uncheckedBox);
+      body.replaceText('{{csc}}', uncheckedBox);
+      body.replaceText('{{leg}}', uncheckedBox);
+      body.replaceText('{{edu2}}', uncheckedBox);
+
+    }
+
+    var dateOfEscalation = SpreadsheetApp.getActiveSheet().getRange('AC' + selectionRow).getValue();
+    var date4 = Date(dateOfEscalation).toString().slice(0,16);
+    body.replaceText('{{EscalationDate}}', date4);
+
+
+    var escalationReasons = SpreadsheetApp.getActiveSheet().getRange('AD' + selectionRow).getValue();
+    if(escalationReasons == 'هجوم إرهابي'){
+
+      body.replaceText('{{terror}}', checkedBox);
+      body.replaceText('{{senSys}}', uncheckedBox);
+      body.replaceText('{{network}}', uncheckedBox);
+      body.replaceText('{{people}}', uncheckedBox);
+      body.replaceText('{{outside}}', uncheckedBox);
+      body.replaceText('{{fraud}}', uncheckedBox);
+
+    }else if(escalationReasons == 'هجوم على الأنظمة الحساسة'){
+
+      body.replaceText('{{terror}}', uncheckedBox);
+      body.replaceText('{{senSys}}', checkedBox);
+      body.replaceText('{{network}}', uncheckedBox);
+      body.replaceText('{{people}}', uncheckedBox);
+      body.replaceText('{{outside}}', uncheckedBox);
+      body.replaceText('{{fraud}}', uncheckedBox);
+
+    }else if(escalationReasons == 'هجوم منظم على الشبكة'){
+      
+      body.replaceText('{{terror}}', uncheckedBox);
+      body.replaceText('{{senSys}}', uncheckedBox);
+      body.replaceText('{{network}}', checkedBox);
+      body.replaceText('{{people}}', uncheckedBox);
+      body.replaceText('{{outside}}', uncheckedBox);
+      body.replaceText('{{fraud}}', uncheckedBox);
+
+    }else if(escalationReasons == 'استهداف جهات / أشخاص'){
+
+      body.replaceText('{{terror}}', uncheckedBox);
+      body.replaceText('{{senSys}}', uncheckedBox);
+      body.replaceText('{{network}}', uncheckedBox);
+      body.replaceText('{{people}}', checkedBox);
+      body.replaceText('{{outside}}', uncheckedBox);
+      body.replaceText('{{fraud}}', uncheckedBox);
+
+    }else if(escalationReasons == 'عناوين خارجية مشتبه (IoC)'){
+      
+      body.replaceText('{{terror}}', uncheckedBox);
+      body.replaceText('{{senSys}}', uncheckedBox);
+      body.replaceText('{{network}}', uncheckedBox);
+      body.replaceText('{{people}}', uncheckedBox);
+      body.replaceText('{{outside}}', checkedBox);
+      body.replaceText('{{fraud}}', uncheckedBox);
+    
+    }else if(escalationReasons == 'انتحال هوية'){
+
+      body.replaceText('{{terror}}', uncheckedBox);
+      body.replaceText('{{senSys}}', uncheckedBox);
+      body.replaceText('{{network}}', uncheckedBox);
+      body.replaceText('{{people}}', uncheckedBox);
+      body.replaceText('{{outside}}', uncheckedBox);
+      body.replaceText('{{fraud}}', checkedBox);
+
+    }else{
+
+      body.replaceText('{{terror}}', uncheckedBox);
+      body.replaceText('{{senSys}}', uncheckedBox);
+      body.replaceText('{{network}}', uncheckedBox);
+      body.replaceText('{{people}}', uncheckedBox);
+      body.replaceText('{{outside}}', uncheckedBox);
+      body.replaceText('{{fraud}}', uncheckedBox);
+
+    }
+
+    var isContinuityPlanned = SpreadsheetApp.getActiveSheet().getRange('AE' + selectionRow).getValue();
+    var howPlanned = SpreadsheetApp.getActiveSheet().getRange('AF' + selectionRow).getValue();
+    if(isContinuityPlanned == 'نعم'){
+
+      body.replaceText('{{yes}}', checkedBox);
+      body.replaceText('{{How}}', howPlanned);
+
+    }else if(isContinuityPlanned == 'لا'){
+
+      body.replaceText('{{yes}}', uncheckedBox);
+    
+    }
+    
+    var action = SpreadsheetApp.getActiveSheet().getRange('AG' + selectionRow).getValue();
+    var findings = SpreadsheetApp.getActiveSheet().getRange('AH' +selectionRow).getValue();
+    var leassonLearned = SpreadsheetApp.getActiveSheet().getRange('AI' + selectionRow).getValue();
+    var moreInfo = SpreadsheetApp.getActiveSheet().getRange('AJ' + selectionRow).getValue();
+
+    body.replaceText('{{Action}}', action);
+    body.replaceText('{{Findings}}', findings);
+    body.replaceText('{{leassonLearned}}', leassonLearned);
+    body.replaceText('{{moreInfo}}', moreInfo);
+    
+
+    var forensics  = SpreadsheetApp.getActiveSheet().getRange('AK' + selectionRow).getValue();
+    var questions = SpreadsheetApp.getActiveSheet().getRange('AL' + selectionRow).getValue();
+    if(forensics == 'نعم'){
+
+      body.replaceText('{{yes2}}',checkedBox);
+      body.replaceText('{{no}}', uncheckedBox);
+      
+      body.replaceText('{{questions}}', questions);
+
+    }else if(forensics == 'لا'){
+      
+      body.replaceText('{{yes2}}',uncheckedBox);
+      body.replaceText('{{no}}', checkedBox);
+      body.replaceText('{{questions}}', questions);
+    
+    }else{
+
+      body.replaceText('{{yes2}}',uncheckedBox);
+      body.replaceText('{{no}}', uncheckedBox);
+      body.replaceText('{{questions}}', questions);
+
+    }
+    
+
+    // Assuming a new column is added 
+    // TODO 
+
+    var approvalDate = SpreadsheetApp.getActiveSheet().getRange('F' + selectionRow).getValue();
+    var date5 = (Date(approvalDate).toString().slice(0,16));
+    body.replaceText('{{aprovalDate}}', date5);
+
+    
+    doc.saveAndClose();
+
+  }else{
+
+    Browser.msgBox('Please select a valid row that rontain actual data');
+
+  }
+}
